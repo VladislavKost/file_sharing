@@ -1,5 +1,5 @@
 """
-WSGI config for english_cats project.
+WSGI config for file_sharing project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "english_cats.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "file_sharing.settings")
 
 application = get_wsgi_application()

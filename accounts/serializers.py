@@ -1,6 +1,10 @@
+import os
 from rest_framework import serializers
 from dj_rest_auth.registration.serializers import RegisterSerializer
+from dj_rest_auth.serializers import UserDetailsSerializer, LoginSerializer
 from django.utils.translation import gettext_lazy as _
+from rest_framework import exceptions, serializers
+from django.conf import settings
 
 try:
     from allauth.account import app_settings as allauth_account_settings
@@ -29,3 +33,24 @@ class RegisterSerializerCustom(RegisterSerializer):
                             ),
                         )
         return email
+
+
+class CustomUserDetailsSerializer(UserDetailsSerializer):
+
+    class Meta(UserDetailsSerializer.Meta):
+        fields = UserDetailsSerializer.Meta.fields + (
+            "user_image",
+            "gender",
+        )
+
+    def update(self, instance, validated_data):
+        if "user_image" in validated_data:
+            old_image_path = instance.user_image.path
+            os.remove(old_image_path)
+
+        instance.user_image = validated_data.get("user_image", instance.user_image)
+        instance.gender = validated_data.get("gender", instance.gender)
+        instance.first_name = validated_data.get("first_name", instance.first_name)
+        instance.last_name = validated_data.get("last_name", instance.last_name)
+        instance.save()
+        return instance

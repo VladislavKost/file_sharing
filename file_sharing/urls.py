@@ -1,5 +1,5 @@
 """
-URL configuration for english_cats project.
+URL configuration for file_sharing project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.1/topics/http/urls/
@@ -26,6 +26,7 @@ urlpatterns = [
         TemplateView.as_view(template_name="password_reset_confirm.html"),
         name="password_reset_confirm",
     ),
+    path("api/v1/users/", include("accounts.urls")),
     path("admin/", admin.site.urls),
     path("api/v1/users/", include("dj_rest_auth.urls")),
     path("api/v1/users/registration/", include("dj_rest_auth.registration.urls")),
