@@ -1,10 +1,8 @@
 import os
 from rest_framework import serializers
 from dj_rest_auth.registration.serializers import RegisterSerializer
-from dj_rest_auth.serializers import UserDetailsSerializer, LoginSerializer
+from dj_rest_auth.serializers import UserDetailsSerializer
 from django.utils.translation import gettext_lazy as _
-from rest_framework import exceptions, serializers
-from django.conf import settings
 
 try:
     from allauth.account import app_settings as allauth_account_settings

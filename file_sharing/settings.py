@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
     "corsheaders",
     "drf_spectacular",
+    "files_store"
 ]
 
 SITE_ID = 1
