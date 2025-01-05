@@ -83,7 +83,12 @@ class FileStoreView(APIView):
         user_id = request.user.id
         file_store = FileStore.objects.get(id=int(id))
         if file_store and file_store.owner_id.id == user_id:
+            file_path = file_store.file.path
             file_store.delete()
+
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
             return Response({"message": "File deleted successfully"}, status=204)
         elif file_store and file_store.owner_id.id != user_id:
             return Response(
