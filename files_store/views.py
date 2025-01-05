@@ -1,10 +1,32 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+
+from accounts.models import CustomUser
 from .serializers import FilesStoreSerializer
 from .models import FileStore
 from rest_framework.response import Response
 from django.http import HttpResponse
 import os
+
+
+def get_owner(data):
+    result = []
+    for item in data:
+        owner_data = get_owner_data(item["owner_id"])
+        item["owner"] = owner_data
+        del item["owner_id"]
+        result.append(item)
+    return result
+
+
+def get_owner_data(owner_id):
+    owner = CustomUser.objects.get(id=owner_id)
+    owner_data = {
+        "id": owner.id,
+        "first_name": owner.first_name,
+        "last_name": owner.last_name,
+    }
+    return owner_data
 
 
 class FilesStoreView(APIView):
@@ -15,7 +37,9 @@ class FilesStoreView(APIView):
         user = request.user
         files = FileStore.objects.filter(owner_id=user.id)
         serializer = self.serializer_class(files, many=True)
-        return Response(serializer.data)
+        response_data = get_owner(serializer.data)
+
+        return Response(response_data)
 
     def post(self, request, *args, **kwargs):
         user = request.user.id
@@ -67,3 +91,15 @@ class FileStoreView(APIView):
             )
         else:
             return Response({"message": "File not found"}, status=404)
+
+
+class FilesStoreAllView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FilesStoreSerializer
+
+    def get(self, request, *args, **kwargs):
+        files = FileStore.objects.all()
+        serializer = self.serializer_class(files, many=True)
+        response_data = get_owner(serializer.data)
+
+        return Response(response_data)

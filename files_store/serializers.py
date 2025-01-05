@@ -6,7 +6,15 @@ from .models import FileStore
 class FilesStoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = FileStore
-        fields = ["id", "file", "owner_id", "file_name", "unique_code", "uploaded_at"]
+        fields = [
+            "id",
+            "file",
+            "owner_id",
+            "file_name",
+            "unique_code",
+            "uploaded_at",
+            "comment",
+        ]
 
     def create(self, validated_data):
         file_name = validated_data["file"].name

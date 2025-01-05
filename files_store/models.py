@@ -14,3 +14,4 @@ class FileStore(models.Model):
     owner_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     file_name = models.CharField(max_length=255, blank=True, null=True)
     unique_code = models.CharField(max_length=255, blank=True, null=True)
+    comment = models.TextField(blank=True, null=True)
