@@ -1,3 +1,4 @@
+from datetime import datetime
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 
@@ -6,6 +7,7 @@ from .serializers import FilesStoreSerializer
 from .models import FileStore
 from rest_framework.response import Response
 from django.http import HttpResponse
+from django.utils import timezone
 import os
 
 
@@ -61,7 +63,6 @@ class FileStoreView(APIView):
     serializer_class = FilesStoreSerializer
 
     def get(self, request, id, *args, **kwargs):
-        user_id = request.user.id
         file_store = FileStore.objects.get(id=int(id))
         if file_store:
             file_path = file_store.file.path
@@ -71,6 +72,10 @@ class FileStoreView(APIView):
             response["Content-Disposition"] = (
                 f"attachment; filename={file_store.file_name}"
             )
+
+            file_store.last_downloaded = timezone.now()
+            file_store.save()
+
             return response
 
         else:

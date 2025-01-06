@@ -14,6 +14,8 @@ class FilesStoreSerializer(serializers.ModelSerializer):
             "unique_code",
             "uploaded_at",
             "comment",
+            "last_downloaded",
+            "file_size",
         ]
 
     def create(self, validated_data):
@@ -21,6 +23,7 @@ class FilesStoreSerializer(serializers.ModelSerializer):
         unique_code = self.generate_unique_code(validated_data["owner_id"])
         validated_data["unique_code"] = unique_code
         validated_data["file_name"] = file_name
+        validated_data["file_size"] = validated_data["file"].size
 
         file_store_instance = FileStore.objects.create(**validated_data)
         return file_store_instance

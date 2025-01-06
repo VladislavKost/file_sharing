@@ -15,3 +15,5 @@ class FileStore(models.Model):
     file_name = models.CharField(max_length=255, blank=True, null=True)
     unique_code = models.CharField(max_length=255, blank=True, null=True)
     comment = models.TextField(blank=True, null=True)
+    last_downloaded = models.DateTimeField(blank=True, null=True)
+    file_size = models.IntegerField(blank=True, null=True)
