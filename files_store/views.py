@@ -1,4 +1,4 @@
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 
 from accounts.models import CustomUser
@@ -57,29 +57,29 @@ class FilesStoreView(APIView):
 
 
 class FileStoreView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = FilesStoreSerializer
 
     def get(self, request, id, *args, **kwargs):
         user_id = request.user.id
         file_store = FileStore.objects.get(id=int(id))
         if file_store:
-            if file_store.owner_id.id == user_id:
-                file_path = file_store.file.path
-                filename = os.path.basename(file_path)
-                file_data = open(file_path, "rb")
-                content_type = "application/octet-stream"
-                response = HttpResponse(file_data, content_type=content_type)
-                response["Content-Disposition"] = f"attachment; filename={filename}"
-                return response
-            else:
-                return Response(
-                    {"message": "You are not authorized to view this file"}, status=403
-                )
+            file_path = file_store.file.path
+            file_data = open(file_path, "rb")
+            content_type = "application/octet-stream"
+            response = HttpResponse(file_data, content_type=content_type)
+            response["Content-Disposition"] = (
+                f"attachment; filename={file_store.file_name}"
+            )
+            return response
+
         else:
             return Response({"message": "File not found"}, status=404)
 
     def delete(self, request, id, *args, **kwargs):
+        self.permission_classes = [IsAuthenticated]
+        self.check_permissions(request)
+
         user_id = request.user.id
         file_store = FileStore.objects.get(id=int(id))
         if file_store and file_store.owner_id.id == user_id:
@@ -98,6 +98,9 @@ class FileStoreView(APIView):
             return Response({"message": "File not found"}, status=404)
 
     def patch(self, request, id, *args, **kwargs):
+        self.permission_classes = [IsAuthenticated]
+        self.check_permissions(request)
+
         file = FileStore.objects.get(id=id)
         if file.owner_id.id == request.user.id:
             serializer = FilesStoreSerializer(file, data=request.data, partial=True)
