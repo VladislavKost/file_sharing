@@ -59,14 +59,14 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
     "corsheaders",
     "drf_spectacular",
-    "files_store"
+    "files_store",
 ]
 
 SITE_ID = 1
 
 ACCOUNT_CONFIRMATION_AUTHENTICATED_REDIRECTS = True
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_VERIFICATION = "optional"
 ACCOUNT_AUTHENTICATION_METHOD = "username_email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
@@ -93,7 +93,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "file_sharing.urls"
 ACCOUNT_ADAPTER = "accounts.adapters.AccountAdapterCustom"
-AUTH_USER_MODEL = 'accounts.CustomUser'
+AUTH_USER_MODEL = "accounts.CustomUser"
 FRONTEND_URL = "http://localhost:5173"
 
 TEMPLATES = [

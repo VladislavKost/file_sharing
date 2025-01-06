@@ -97,6 +97,16 @@ class FileStoreView(APIView):
         else:
             return Response({"message": "File not found"}, status=404)
 
+    def patch(self, request, id, *args, **kwargs):
+        file = FileStore.objects.get(id=id)
+        if file.owner_id.id == request.user.id:
+            serializer = FilesStoreSerializer(file, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=400)
+        return Response(self.serializer_class.errors, status=400)
+
 
 class FilesStoreAllView(APIView):
     permission_classes = [IsAuthenticated]
