@@ -13,3 +13,9 @@ class CustomUser(AbstractUser):
     gender = models.CharField(
         choices=[("male", "Male"), ("female", "Female")], null=True
     )
+    is_admin = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if self.is_superuser:
+            self.is_admin = True
+        return super().save(*args, **kwargs)

@@ -8,6 +8,8 @@ import base64
 from django.utils import timezone
 from dj_rest_auth.app_settings import api_settings
 from rest_framework import status
+from .models import CustomUser
+from files_store.models import FileStore
 
 
 def get_base64_image(image):
@@ -22,7 +24,8 @@ class CustomUserView(APIView):
     def get(self, request):
         serializer = CustomUserDetailsSerializer(request.user)
         data = serializer.data
-        data["user_image"] = get_base64_image(request.user.user_image.path)
+        if request.user.user_image:
+            data["user_image"] = get_base64_image(request.user.user_image.path)
         return Response(data)
 
     def patch(self, request):
@@ -38,6 +41,26 @@ class CustomUserView(APIView):
         user = request.user
         user.delete()
         return Response({"message": "Account deleted successfully."})
+
+
+class CustomUsersView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CustomUserDetailsSerializer
+
+    def get(self, request):
+        users = CustomUser.objects.all()
+        serializer = CustomUserDetailsSerializer(users, many=True)
+        response_data = serializer.data
+        for user in response_data:
+            user_obj = CustomUser.objects.get(id=user["id"])
+            if user_obj.user_image:
+                user["user_image"] = get_base64_image(user_obj.user_image.path)
+            user_files = FileStore.objects.filter(owner_id=user_obj.id)
+            user_files_amount = user_files.count()
+            user_files_size = sum(file.file.size for file in user_files)
+            user["files_amount"] = user_files_amount
+            user["files_size"] = user_files_size
+        return Response(response_data)
 
 
 class CustomLoginView(LoginView):
@@ -85,9 +108,10 @@ class CustomLoginView(LoginView):
         else:
             return Response(status=status.HTTP_204_NO_CONTENT)
         response_data = serializer.data
-        response_data["user"]["user_image"] = get_base64_image(
-            self.user.user_image.path
-        )
+        if self.user.user_image:
+            response_data["user"]["user_image"] = get_base64_image(
+                self.user.user_image.path
+            )
         response = Response(response_data, status=status.HTTP_200_OK)
         if api_settings.USE_JWT:
             from dj_rest_auth.jwt_auth import set_jwt_cookies

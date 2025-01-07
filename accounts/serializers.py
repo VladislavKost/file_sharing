@@ -39,6 +39,8 @@ class CustomUserDetailsSerializer(UserDetailsSerializer):
         fields = UserDetailsSerializer.Meta.fields + (
             "user_image",
             "gender",
+            "id",
+            "is_admin",
         )
 
     def update(self, instance, validated_data):
