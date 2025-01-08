@@ -1,5 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import Permission
+
 from rest_framework.views import APIView
 from .serializers import CustomUserDetailsSerializer
 from dj_rest_auth.views import LoginView
@@ -17,28 +19,59 @@ def get_base64_image(image):
         return f"data:image/png;base64,{base64.b64encode(image_file.read()).decode('utf-8')}"
 
 
+def get_user_advanced_info(user):
+    user_obj = CustomUser.objects.get(id=user["id"])
+    if user_obj.user_image:
+        user["user_image"] = get_base64_image(user_obj.user_image.path)
+    user_files = FileStore.objects.filter(owner_id=user_obj.id)
+    user_files_amount = user_files.count()
+    user_files_size = sum(file.file.size for file in user_files)
+    user["files_amount"] = user_files_amount
+    user["files_size"] = user_files_size
+
+
 class CustomUserView(APIView):
     serializer_class = CustomUserDetailsSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        serializer = CustomUserDetailsSerializer(request.user)
-        data = serializer.data
-        if request.user.user_image:
-            data["user_image"] = get_base64_image(request.user.user_image.path)
-        return Response(data)
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if kwargs.get("id"):
+            user = CustomUser.objects.get(id=kwargs.get("id"))
+        serializer = CustomUserDetailsSerializer(user)
+        user = serializer.data
+        get_user_advanced_info(user)
+        return Response(user)
 
-    def patch(self, request):
-        serializer = CustomUserDetailsSerializer(
-            request.user, data=request.data, partial=True
-        )
+    def patch(self, request, *args, **kwargs):
+        data = request.data
+        user = request.user
+        if kwargs.get("id"):
+            user = CustomUser.objects.get(id=kwargs.get("id"))
+        if request.user.id != user.id and not request.user.is_admin:
+            return Response(
+                {"message": "You are not allowed to edit this user."}, status=403
+            )
+        if (
+            request.user.id == user.id
+            and not request.user.is_admin
+            and data.get("is_admin")
+        ):
+            data["is_admin"] = False
+        serializer = CustomUserDetailsSerializer(user, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
 
-    def delete(self, request):
+    def delete(self, request, *args, **kwargs):
         user = request.user
+        if kwargs.get("id"):
+            user = CustomUser.objects.get(id=kwargs.get("id"))
+        if request.user.id != user.id and not request.user.is_admin:
+            return Response(
+                {"message": "You are not allowed to delete this user."}, status=403
+            )
         user.delete()
         return Response({"message": "Account deleted successfully."})
 
@@ -48,18 +81,11 @@ class CustomUsersView(APIView):
     serializer_class = CustomUserDetailsSerializer
 
     def get(self, request):
-        users = CustomUser.objects.all()
+        users = CustomUser.objects.all().order_by("id")
         serializer = CustomUserDetailsSerializer(users, many=True)
         response_data = serializer.data
         for user in response_data:
-            user_obj = CustomUser.objects.get(id=user["id"])
-            if user_obj.user_image:
-                user["user_image"] = get_base64_image(user_obj.user_image.path)
-            user_files = FileStore.objects.filter(owner_id=user_obj.id)
-            user_files_amount = user_files.count()
-            user_files_size = sum(file.file.size for file in user_files)
-            user["files_amount"] = user_files_amount
-            user["files_size"] = user_files_size
+            get_user_advanced_info(user)
         return Response(response_data)
 
 

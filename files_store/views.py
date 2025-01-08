@@ -37,7 +37,14 @@ class FilesStoreView(APIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        files = FileStore.objects.filter(owner_id=user.id)
+        if kwargs.get("id"):
+            user = CustomUser.objects.get(id=kwargs["id"])
+        if request.user.id != user.id and not request.user.is_admin:
+            return Response(
+                {"message": "You are not allowed to view files of this user."},
+                status=403,
+            )
+        files = FileStore.objects.filter(owner_id=user.id).order_by("id")
         serializer = self.serializer_class(files, many=True)
         response_data = get_owner(serializer.data)
 
@@ -95,7 +102,9 @@ class FileStoreView(APIView):
                 os.remove(file_path)
 
             return Response({"message": "File deleted successfully"}, status=204)
-        elif file_store and file_store.owner_id.id != user_id:
+        elif file_store and (
+            file_store.owner_id.id != user_id or not request.user.is_admin
+        ):
             return Response(
                 {"message": "You are not authorized to delete this file"}, status=403
             )
@@ -107,7 +116,7 @@ class FileStoreView(APIView):
         self.check_permissions(request)
 
         file = FileStore.objects.get(id=id)
-        if file.owner_id.id == request.user.id:
+        if file.owner_id.id == request.user.id or request.user.is_admin:
             serializer = FilesStoreSerializer(file, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()

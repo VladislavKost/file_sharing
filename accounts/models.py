@@ -11,7 +11,7 @@ class CustomUser(AbstractUser):
         upload_to=profile_directory_path, blank=True, null=True
     )
     gender = models.CharField(
-        choices=[("male", "Male"), ("female", "Female")], null=True
+        choices=[("male", "Male"), ("female", "Female")], null=True, blank=True
     )
     is_admin = models.BooleanField(default=False)
 

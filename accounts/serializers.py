@@ -52,5 +52,7 @@ class CustomUserDetailsSerializer(UserDetailsSerializer):
         instance.gender = validated_data.get("gender", instance.gender)
         instance.first_name = validated_data.get("first_name", instance.first_name)
         instance.last_name = validated_data.get("last_name", instance.last_name)
+        instance.email = validated_data.get("email", instance.email)
+        instance.is_admin = validated_data.get("is_admin", instance.is_admin)
         instance.save()
         return instance
