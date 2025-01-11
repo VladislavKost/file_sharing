@@ -26,10 +26,10 @@ urlpatterns = [
         TemplateView.as_view(template_name="password_reset_confirm.html"),
         name="password_reset_confirm",
     ),
-    path("api/v1/users/", include("accounts.urls")),
     path("admin/", admin.site.urls),
-    path("api/v1/users/", include("dj_rest_auth.urls")),
     path("api/v1/users/registration/", include("dj_rest_auth.registration.urls")),
+    path("api/v1/users/", include("accounts.urls")),
+    path("api/v1/users/", include("dj_rest_auth.urls")),
     path("api/v1/files/", include("files_store.urls")),
     path("api/v1/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
