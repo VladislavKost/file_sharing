@@ -130,7 +130,7 @@ class FilesStoreAllView(APIView):
     serializer_class = FilesStoreSerializer
 
     def get(self, request, *args, **kwargs):
-        files = FileStore.objects.all()
+        files = FileStore.objects.all().order_by("id")
         serializer = self.serializer_class(files, many=True)
         response_data = get_owner(serializer.data)
 
