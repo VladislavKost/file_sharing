@@ -10,28 +10,34 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import environ
 from pathlib import Path
 from datetime import timedelta
 from corsheaders.defaults import default_headers
 
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+# Инициализация environ
+env = environ.Env()
+environ.Env.read_env(env_file=str(BASE_DIR) + '/.env') 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-nk_ldbeh-v7ndk--rjg73n0zc)!o^i8ox87h--1xu18wzew_&z"
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env("DEBUG") == "True"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(",")
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]
+FRONTEND_URL = env("FRONTEND_URL")
+
+CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS").split(",")
+
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "Content-Disposition",
     "content-type",
@@ -101,7 +107,6 @@ MIDDLEWARE = [
 ROOT_URLCONF = "file_sharing.urls"
 ACCOUNT_ADAPTER = "accounts.adapters.AccountAdapterCustom"
 AUTH_USER_MODEL = "accounts.CustomUser"
-FRONTEND_URL = "http://localhost:5173"
 
 TEMPLATES = [
     {
@@ -128,11 +133,11 @@ WSGI_APPLICATION = "file_sharing.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "file_sharing_backend",
-        "HOST": "127.0.0.1",
-        "PORT": "5432",
-        "USER": "file_sharing_user",
-        "PASSWORD": "Z6U.b!9",
+        "NAME": env("DB_NAME"),
+        "HOST": env("DB_HOST"),
+        "PORT": env("DB_PORT"),
+        "USER": env("DB_USER"),
+        "PASSWORD": env("DB_PASSWORD"),
     }
 }
 
@@ -232,10 +237,10 @@ SIMPLE_JWT = {
 # Mail provider Configuration
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "localhost"  # Your Mailhog Host
-EMAIL_PORT = "8003"
-MAIL_MAILER = "smtp"
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = False
-DEFAULT_FROM_EMAIL = "webmaster@localhost"
-DEFAULT_FROM_EMAIL = "filesharing@gmail.com"
+# EMAIL_HOST = "localhost"  # Your Mailhog Host
+# EMAIL_PORT = "8003"
+# MAIL_MAILER = "smtp"
+# EMAIL_USE_TLS = False
+# EMAIL_USE_SSL = False
+# DEFAULT_FROM_EMAIL = "webmaster@localhost"
+# DEFAULT_FROM_EMAIL = "filesharing@gmail.com"
