@@ -5,6 +5,7 @@
 4. Для аутентификации пользователя используется JWT.
 
 Для задания параметров нужно создать файл .env в корне проекта и записать в него:
+```
 SECRET_KEY=your_secret_key
 DEBUG=True/False
 ALLOWED_HOSTS=localhost,127.0.0.1
@@ -16,3 +17,4 @@ DB_HOST=127.0.0.1
 DB_PORT=5432
 DB_USER=your_user
 DB_PASSWORD=your_password
+```
