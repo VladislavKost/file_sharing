@@ -45,8 +45,9 @@ class CustomUserDetailsSerializer(UserDetailsSerializer):
 
     def update(self, instance, validated_data):
         if "user_image" in validated_data:
-            old_image_path = instance.user_image.path
-            os.remove(old_image_path)
+            if instance.user_image:
+                old_image_path = instance.user_image.path
+                os.remove(old_image_path)
 
         instance.user_image = validated_data.get("user_image", instance.user_image)
         instance.gender = validated_data.get("gender", instance.gender)
