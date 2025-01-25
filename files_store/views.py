@@ -94,7 +94,7 @@ class FileStoreView(APIView):
 
         user_id = request.user.id
         file_store = FileStore.objects.get(id=int(id))
-        if file_store and file_store.owner_id.id == user_id:
+        if file_store and (file_store.owner_id.id == user_id or request.user.is_admin):
             file_path = file_store.file.path
             file_store.delete()
 
